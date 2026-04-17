@@ -1,0 +1,90 @@
+---
+openapi: 3.0.2
+info:
+    title: Occupy
+    version: '1.0'
+    description: 'defines an API for the game, Occupy.'
+x-amazon-apigateway-request-validators:
+    all:
+        validateRequestBody: true
+        validateRequestParameters: true
+    params-only:
+        validateRequestBody: false
+        validateRequestParameters: true
+x-amazon-apigateway-request-validator: params-only
+paths:
+    '/game':
+        post:
+            x-amazon-apigateway-auth:
+                type: AWS_IAM
+            x-amazon-apigateway-request-validator: all
+            summary: Create a new game
+            description: Create a new game
+            x-amazon-apigateway-integration:
+                httpMethod: POST
+                uri: GameHandler
+                passthroughBehavior: when_no_match
+                type: aws_proxy
+            requestBody:
+                description: Create a new game
+                content:
+                    application/json:
+                        schema:
+                            '$ref': '#/components/schemas/GameAttributes'
+                required: true
+            responses:
+                '200':
+                    description: Successful operation
+                    content:
+                        application/json:
+                            schema:
+                                '$ref': '#/components/schemas/GameObject'
+    '/game/{gameId}':
+        get:
+            x-amazon-apigateway-auth:
+                type: AWS_IAM
+            summary: Get Game by ID
+            description: Returns game data for the provided ID
+            x-amazon-apigateway-integration:
+                httpMethod: POST
+                uri: GameHandler
+                passthroughBehavior: when_no_match
+                type: aws_proxy
+            parameters:
+                - name: gameId
+                  in: path
+                  required: true
+                  schema:
+                      type: integer
+                      format: int64
+            responses:
+                '200':
+                    description: successful operation
+                    content:
+                        application/json:
+                            schema:
+                                '$ref': '#/components/schemas/GameObject'
+                '400':
+                    description: Bad game ID
+                '404':
+                    description: Game ID not found
+components:
+    schemas:
+        GameAttributes:
+            type: object
+            additionalProperties: false
+            required:
+                - turnIndicator
+            properties:
+                turnIndicator:
+                    type: integer
+        GameObject:
+            allOf:
+                - '$ref': '#/components/schemas/GameAttributes'
+                - type: object
+                  additionalProperties: false
+                  required:
+                      - id
+                  properties:
+                      id:
+                          type: string
