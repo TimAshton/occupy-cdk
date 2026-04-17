@@ -1,0 +1,32 @@
+name: Basic Checks
+
+on:
+    push:
+        branches: [main]
+    pull_request:
+        branches: [main]
+
+jobs:
+    unit-tests:
+        name: Unit Tests
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+        env:
+            # Opts into the new Node 24 runner engine now to clear the deprecation error
+            FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v5
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v5
+              with:
+                  node-version: 24
+                  cache: 'npm'
+
+            - name: Install & Test
+              run: |
+                  npm ci
+                  npm test
